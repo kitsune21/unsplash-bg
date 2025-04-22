@@ -1,4 +1,6 @@
 from dotenv import load_dotenv
+from save_image import *
+from set_background import *
 import os
 import requests
 
@@ -16,7 +18,8 @@ def get_random_picture():
     return
   return res.json()
 
-def download_image(image_url, path):
+def download_image(image_url, file_name):
+  path = get_default_backgrounds_directory() + f"/{file_name}"
   try:
     response = requests.get(image_url, stream=True)
 
@@ -26,6 +29,7 @@ def download_image(image_url, path):
       for chunk in response.iter_content(chunk_size=8192):
         f.write(chunk)
     print(f"Image downloaded to {path}")
+    return path
   except requests.exceptions.RequestException as e:
     print(f"Error downloading image: {e}")
   except IOError as e:
@@ -34,4 +38,5 @@ def download_image(image_url, path):
 
 if __name__ == "__main__":
   image_data = get_random_picture()
-  download_image(image_data["urls"]["regular"], f"./pics/{image_data["slug"]}.png")
+  image_full_path = download_image(image_data["urls"]["raw"], f"{image_data["slug"]}.png")
+  set_desktop_wallpaper(image_full_path)
